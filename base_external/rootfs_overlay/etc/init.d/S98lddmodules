@@ -1,0 +1,47 @@
+#!/bin/sh
+
+case "$1" in
+start)
+    echo "Loading LDD modules"
+
+    MODULE_PATH="/lib/modules/$(uname -r)/updates"
+
+    # Load modules
+    insmod $MODULE_PATH/scull.ko || exit 1
+    insmod $MODULE_PATH/faulty.ko || exit 1
+    modprobe hello || exit 1
+
+    # Get correct major numbers (exact match)
+    scull_major=$(awk '$2=="scull" {print $1}' /proc/devices)
+    faulty_major=$(awk '$2=="faulty" {print $1}' /proc/devices)
+
+    echo "scull major: $scull_major"
+    echo "faulty major: $faulty_major"
+
+    # Create scull device nodes
+    mknod /dev/scull0 c $scull_major 0
+    mknod /dev/scull1 c $scull_major 1
+    mknod /dev/scull2 c $scull_major 2
+    mknod /dev/scull3 c $scull_major 3
+
+    # Create faulty device
+    mknod /dev/faulty c $faulty_major 0
+    ;;
+
+stop)
+    echo "Unloading LDD modules"
+
+    rm -f /dev/scull0 /dev/scull1 /dev/scull2 /dev/scull3
+    rm -f /dev/faulty
+
+    rmmod scull
+    rmmod faulty
+    rmmod hello
+    ;;
+
+*)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+esac
+
+exit 0
