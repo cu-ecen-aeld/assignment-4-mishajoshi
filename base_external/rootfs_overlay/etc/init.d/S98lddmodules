@@ -1,10 +1,19 @@
+
 #!/bin/sh
 
 case "$1" in
 start)
     echo "Loading LDD modules"
 
-    MODULE_PATH="/lib/modules/$(uname -r)/updates"
+echo "Kernel version: $(uname -r)"
+
+find /lib/modules -name "*.ko"
+
+MODULE_PATH=$(find /lib/modules/$(uname -r) -name scull.ko | xargs dirname)
+
+echo "Resolved module path: $MODULE_PATH"
+
+   # MODULE_PATH="/lib/modules/$(uname -r)/updates"
 
     # Load modules
     insmod $MODULE_PATH/scull.ko || exit 1
@@ -34,9 +43,9 @@ stop)
     rm -f /dev/scull0 /dev/scull1 /dev/scull2 /dev/scull3
     rm -f /dev/faulty
 
-    rmmod scull
-    rmmod faulty
     rmmod hello
+    rmmod faulty
+    rmmod scull
     ;;
 
 *)
