@@ -16,6 +16,12 @@ AESD_ASSIGNMENTS_GIT_SUBMODULES = YES
 define AESD_ASSIGNMENTS_BUILD_CMDS
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/finder-app
 	$(MAKE) CC="$(TARGET_CC)" LD="$(TARGET_LD)" -C $(@D)/server 
+
+	$(MAKE) -C $(LINUX_DIR) \
+    M=$(@D)/base_external/aesd-char-driver \
+    ARCH=$(KERNEL_ARCH) \
+    CROSS_COMPILE=$(TARGET_CROSS) \
+    modules
 endef
 
 # TODO add your writer, finder and finder-test utilities/scripts to the installation steps below
