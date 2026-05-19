@@ -13,19 +13,22 @@ AESD_ASSIGNMENTS_SITE = git@github.com:cu-ecen-aeld/assignments-3-and-later-mish
 AESD_ASSIGNMENTS_SITE_METHOD = git
 AESD_ASSIGNMENTS_GIT_SUBMODULES = YES
 
+
+AESD_CHAR_DRIVER_PATH = $(BR2_EXTERNAL_project_base_PATH)/aesd-char-driver
+
 define AESD_ASSIGNMENTS_BUILD_CMDS
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/finder-app
 	$(MAKE) CC="$(TARGET_CC)" LD="$(TARGET_LD)" -C $(@D)/server 
 
-	$(MAKE) -C $(LINUX_DIR) \
-    M=$(@D)/base_external/aesd-char-driver \
-    ARCH=$(KERNEL_ARCH) \
-    CROSS_COMPILE=$(TARGET_CROSS) \
-    modules
+	$(MAKE) -C $(LINUX_DIR) M=$(AESD_CHAR_DRIVER_PATH) \
+    		ARCH=$(KERNEL_ARCH) \
+    		CROSS_COMPILE=$(TARGET_CROSS) \
+    		modules
 endef
 
 # TODO add your writer, finder and finder-test utilities/scripts to the installation steps below
 define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
+	$(INSTALL) -d 0755 $(TARGET_DIR)/etc/init.d
 	$(INSTALL) -d 0755 $(@D)/conf/ $(TARGET_DIR)/etc/finder-app/conf/
 	$(INSTALL) -m 0755 $(@D)/conf/* $(TARGET_DIR)/etc/finder-app/conf/
 	$(INSTALL) -m 0755 $(@D)/assignment-autotest/test/assignment4/* $(TARGET_DIR)/bin
